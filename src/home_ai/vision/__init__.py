@@ -1,1 +1,1 @@
-"""Computer vision system for screen capture and analysis."""
+"""Computer vision: live screen capture, OCR, UI element detection, autonomous navigation."""

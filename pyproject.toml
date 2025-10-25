@@ -40,8 +40,6 @@ requests = "^2.31.0"
 # Computer Vision
 mss = "^9.0.0"
 numpy = "^1.26.0"
-# Financial (paper trading)
-alpaca-py = "^0.9.0"
 # System
 wmi = {version = "^1.5.1", markers = "sys_platform == 'win32'"}
 

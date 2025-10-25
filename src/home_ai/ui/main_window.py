@@ -1,21 +1,23 @@
-"""Main PyQt6 window with tabbed interface."""
+"""Unified main window with integrated vision, commands, business, and monitoring."""
 
 from PyQt6.QtWidgets import (
     QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
     QTabWidget, QTextEdit, QLineEdit, QPushButton,
     QLabel, QStatusBar, QMenuBar, QMenu, QMessageBox,
-    QTableWidget, QTableWidgetItem, QHeaderView
+    QTableWidget, QTableWidgetItem, QHeaderView, QToolBar
 )
 from PyQt6.QtCore import Qt, QThread, pyqtSignal, QTimer
 from PyQt6.QtGui import QAction, QFont, QIcon
 from loguru import logger
 import sys
 
-from home_ai.core.config import get_settings
+from home_ai.core.config import get_settings, reload_settings
 from home_ai.llm.ollama_client import get_ollama_client
 from home_ai.monitoring.system_monitor import get_system_monitor
 from home_ai.security.audit_logger import get_audit_logger
 from home_ai.ui.settings_dialog import SettingsDialog
+from home_ai.ui.vision_tab import VisionTab
+from home_ai.ui.business_widget import BusinessWidget
 
 
 class ChatThread(QThread):
@@ -58,6 +60,7 @@ class MainWindow(QMainWindow):
         self.setGeometry(100, 100, self.settings.gui.window_width, self.settings.gui.window_height)
         
         self.create_menu_bar()
+        self.create_toolbar()
         
         central_widget = QWidget()
         self.setCentralWidget(central_widget)
@@ -67,9 +70,10 @@ class MainWindow(QMainWindow):
         self.tabs = QTabWidget()
         main_layout.addWidget(self.tabs)
         
-        self.create_chat_tab()
+        self.create_vision_tab()
+        self.create_commands_tab()
+        self.create_business_tab()
         self.create_monitoring_tab()
-        self.create_toggles_tab()
         self.create_logs_tab()
         
         self.status_bar = QStatusBar()
@@ -84,7 +88,7 @@ class MainWindow(QMainWindow):
         
         file_menu = menubar.addMenu("&File")
         
-        settings_action = QAction("&Settings", self)
+        settings_action = QAction("⚙ &Settings", self)
         settings_action.triggered.connect(self.show_settings)
         file_menu.addAction(settings_action)
         
@@ -114,10 +118,48 @@ class MainWindow(QMainWindow):
         docs_action.triggered.connect(self.show_docs)
         help_menu.addAction(docs_action)
     
-    def create_chat_tab(self):
-        """Create chat interface tab."""
-        chat_widget = QWidget()
-        layout = QVBoxLayout(chat_widget)
+    def create_toolbar(self):
+        """Create toolbar with quick actions."""
+        toolbar = QToolBar("Main Toolbar")
+        toolbar.setMovable(False)
+        self.addToolBar(toolbar)
+        
+        self.safety_status = QLabel("🟢 Safe Mode")
+        self.safety_status.setStyleSheet("padding: 5px; font-weight: bold; color: #4ade80;")
+        toolbar.addWidget(self.safety_status)
+        
+        toolbar.addSeparator()
+        
+        self.model_label = QLabel(f"Model: {self.settings.llm.preferred_model}")
+        self.model_label.setStyleSheet("padding: 5px;")
+        toolbar.addWidget(self.model_label)
+        
+        toolbar.addSeparator()
+        
+        gpu_text = "🎮 GPU" if self.settings.llm.gpu_acceleration else "💻 CPU"
+        self.gpu_label = QLabel(gpu_text)
+        self.gpu_label.setStyleSheet("padding: 5px;")
+        toolbar.addWidget(self.gpu_label)
+        
+        toolbar.addWidget(QLabel("  "))
+        
+        settings_btn = QPushButton("⚙ Settings")
+        settings_btn.clicked.connect(self.show_settings)
+        toolbar.addWidget(settings_btn)
+    
+    def create_vision_tab(self):
+        """Create computer vision tab."""
+        self.vision_tab = VisionTab()
+        self.tabs.addTab(self.vision_tab, "👁 Vision")
+    
+    def create_commands_tab(self):
+        """Create commands interface tab."""
+        commands_widget = QWidget()
+        layout = QVBoxLayout(commands_widget)
+        
+        info_label = QLabel("💬 Give natural language commands to the AI")
+        info_label.setStyleSheet("font-size: 14px; font-weight: bold; padding: 10px;")
+        layout.addWidget(info_label)
         
         self.chat_display = QTextEdit()
         self.chat_display.setReadOnly(True)
@@ -127,7 +169,7 @@ class MainWindow(QMainWindow):
         input_layout = QHBoxLayout()
         
         self.chat_input = QLineEdit()
-        self.chat_input.setPlaceholderText("Type your message here...")
+        self.chat_input.setPlaceholderText("Type your command here (e.g., 'open Chrome', 'search for Python tutorials')...")
         self.chat_input.returnPressed.connect(self.send_message)
         input_layout.addWidget(self.chat_input)
         
@@ -137,10 +179,27 @@ class MainWindow(QMainWindow):
         
         layout.addLayout(input_layout)
         
-        model_label = QLabel(f"Model: {self.settings.llm.preferred_model}")
-        layout.addWidget(model_label)
+        help_text = QLabel(
+            "Examples: 'What's on my screen?', 'Open notepad', 'Search for AI news', "
+            "'Take a screenshot', 'Show me system stats'"
+        )
+        help_text.setWordWrap(True)
+        help_text.setStyleSheet("padding: 5px; color: #888;")
+        layout.addWidget(help_text)
         
-        self.tabs.addTab(chat_widget, "Chat")
+        self.tabs.addTab(commands_widget, "💬 Commands")
+    
+    def create_business_tab(self):
+        """Create business dashboard tab."""
+        try:
+            self.business_widget = BusinessWidget()
+            self.tabs.addTab(self.business_widget, "💼 Business")
+        except Exception as e:
+            logger.error(f"Failed to create business tab: {e}")
+            placeholder = QWidget()
+            layout = QVBoxLayout(placeholder)
+            layout.addWidget(QLabel(f"Business dashboard unavailable: {e}"))
+            self.tabs.addTab(placeholder, "💼 Business")
     
     def create_monitoring_tab(self):
         """Create system monitoring tab."""
@@ -165,42 +224,36 @@ class MainWindow(QMainWindow):
         
         self.tabs.addTab(monitor_widget, "Monitoring")
     
-    def create_toggles_tab(self):
-        """Create toggle controls tab."""
-        toggles_widget = QWidget()
-        layout = QVBoxLayout(toggles_widget)
-        
-        info_label = QLabel(
-            "Toggle controls will be implemented in CustomTkinter panel.\n"
-            "For now, edit settings in config file."
-        )
-        info_label.setWordWrap(True)
-        layout.addWidget(info_label)
-        
-        self.toggles_display = QTextEdit()
-        self.toggles_display.setReadOnly(True)
-        self.toggles_display.setFont(QFont("Consolas", 9))
-        layout.addWidget(self.toggles_display)
-        
-        self.update_toggles_display()
-        
-        self.tabs.addTab(toggles_widget, "Toggles")
     
     def create_logs_tab(self):
         """Create audit logs tab."""
         logs_widget = QWidget()
         layout = QVBoxLayout(logs_widget)
         
+        header = QLabel("🔒 Audit Logs - Tamper-Proof Security Log")
+        header.setStyleSheet("font-size: 14px; font-weight: bold; padding: 10px;")
+        layout.addWidget(header)
+        
         self.logs_display = QTextEdit()
         self.logs_display.setReadOnly(True)
         self.logs_display.setFont(QFont("Consolas", 9))
         layout.addWidget(self.logs_display)
         
-        refresh_button = QPushButton("Refresh Logs")
-        refresh_button.clicked.connect(self.refresh_logs)
-        layout.addWidget(refresh_button)
+        button_layout = QHBoxLayout()
         
-        self.tabs.addTab(logs_widget, "Audit Logs")
+        refresh_button = QPushButton("🔄 Refresh Logs")
+        refresh_button.clicked.connect(self.refresh_logs)
+        button_layout.addWidget(refresh_button)
+        
+        verify_button = QPushButton("✓ Verify Integrity")
+        verify_button.clicked.connect(self.verify_audit_log)
+        button_layout.addWidget(verify_button)
+        
+        button_layout.addStretch()
+        
+        layout.addLayout(button_layout)
+        
+        self.tabs.addTab(logs_widget, "🔒 Logs")
     
     def setup_timers(self):
         """Setup periodic update timers."""
@@ -303,27 +356,6 @@ Processes:     {stats.process_count}
         except Exception as e:
             logger.error(f"Failed to refresh logs: {e}")
     
-    def update_toggles_display(self):
-        """Update toggles display."""
-        toggles_text = "System Toggles:\n"
-        toggles_text += "━" * 50 + "\n\n"
-        
-        for key, value in self.settings.system_toggles.model_dump().items():
-            status = "✓ ENABLED" if value else "✗ DISABLED"
-            toggles_text += f"{key}: {status}\n"
-        
-        toggles_text += "\n" + "━" * 50 + "\n"
-        toggles_text += "Financial Toggles:\n"
-        toggles_text += "━" * 50 + "\n\n"
-        
-        for key, value in self.settings.financial_toggles.model_dump().items():
-            if isinstance(value, bool):
-                status = "✓ ENABLED" if value else "✗ DISABLED"
-                toggles_text += f"{key}: {status}\n"
-            else:
-                toggles_text += f"{key}: {value}\n"
-        
-        self.toggles_display.setPlainText(toggles_text)
     
     def clear_chat_history(self):
         """Clear chat history."""
@@ -366,8 +398,15 @@ Processes:     {stats.process_count}
     
     def on_settings_changed(self):
         """Handle settings changed."""
+        self.settings = reload_settings()
+        
+        self.model_label.setText(f"Model: {self.settings.llm.preferred_model}")
+        gpu_text = "🎮 GPU" if self.settings.llm.gpu_acceleration else "💻 CPU"
+        self.gpu_label.setText(gpu_text)
+        
+        self.apply_theme()
+        
         self.update_status("Settings updated successfully")
-        self.update_toggles_display()
         logger.info("Settings changed by user")
     
     def show_about(self):

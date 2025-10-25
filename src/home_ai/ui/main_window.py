@@ -15,6 +15,7 @@ from home_ai.core.config import get_settings
 from home_ai.llm.ollama_client import get_ollama_client
 from home_ai.monitoring.system_monitor import get_system_monitor
 from home_ai.security.audit_logger import get_audit_logger
+from home_ai.ui.settings_dialog import SettingsDialog
 
 
 class ChatThread(QThread):
@@ -359,12 +360,15 @@ Processes:     {stats.process_count}
     
     def show_settings(self):
         """Show settings dialog."""
-        QMessageBox.information(
-            self,
-            "Settings",
-            "Settings dialog will be implemented in future version.\n"
-            "For now, edit config file directly."
-        )
+        dialog = SettingsDialog(self)
+        dialog.settings_changed.connect(self.on_settings_changed)
+        dialog.exec()
+    
+    def on_settings_changed(self):
+        """Handle settings changed."""
+        self.update_status("Settings updated successfully")
+        self.update_toggles_display()
+        logger.info("Settings changed by user")
     
     def show_about(self):
         """Show about dialog."""

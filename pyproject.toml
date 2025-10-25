@@ -39,6 +39,16 @@ APScheduler = "^3.10.4"
 requests = "^2.31.0"
 # Financial (paper trading)
 alpaca-py = "^0.9.0"
+stripe = "^7.0.0"
+plaid-python = "^16.0.0"
+# Social Media
+tweepy = "^4.14.0"
+# Intelligence & Memory
+chromadb = "^0.4.0"
+langchain = "^0.1.0"
+beautifulsoup4 = "^4.12.0"
+httpx = "^0.25.0"
+aiohttp = "^3.9.0"
 # System
 wmi = {version = "^1.5.1", markers = "sys_platform == 'win32'"}
 

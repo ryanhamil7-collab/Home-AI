@@ -1,0 +1,85 @@
+[tool.poetry]
+name = "home-ai"
+version = "0.1.0"
+description = "Windows LLM PC Control System with granular toggle controls"
+authors = ["Your Name <your.email@example.com>"]
+readme = "README.md"
+packages = [{include = "home_ai", from = "src"}]
+
+[tool.poetry.dependencies]
+python = "^3.11"
+# LLM
+ollama = "^0.3.0"
+# GUI
+PyQt6 = "^6.6.0"
+customtkinter = "^5.2.0"
+pystray = "^0.19.5"
+Pillow = "^10.0.0"
+# Windows automation
+pywin32 = "^306"
+pywinauto = "^0.6.8"
+psutil = "^5.9.0"
+pygetwindow = "^0.0.9"
+pynput = "^1.7.6"
+pyautogui = "^0.9.54"
+# File system
+watchdog = "^4.0.0"
+# Browser automation
+selenium = "^4.15.0"
+undetected-chromedriver = "^3.5.0"
+# Security & Config
+pydantic = "^2.5.0"
+pydantic-settings = "^2.1.0"
+python-dotenv = "^1.0.0"
+cryptography = "^41.0.0"
+keyring = "^24.3.0"
+# Utilities
+loguru = "^0.7.2"
+APScheduler = "^3.10.4"
+requests = "^2.31.0"
+# Financial (paper trading)
+alpaca-py = "^0.9.0"
+# System
+wmi = {version = "^1.5.1", markers = "sys_platform == 'win32'"}
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^7.4.0"
+pytest-cov = "^4.1.0"
+pytest-asyncio = "^0.21.0"
+black = "^23.12.0"
+ruff = "^0.1.8"
+mypy = "^1.7.0"
+types-requests = "^2.31.0"
+
+[tool.poetry.group.browser]
+selenium = "^4.15.0"
+undetected-chromedriver = "^3.5.0"
+
+[tool.poetry.group.finance]
+alpaca-py = "^0.9.0"
+plaid-python = "^16.0.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.black]
+line-length = 100
+target-version = ['py311']
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.mypy]
+python_version = "3.11"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+addopts = "-v --cov=src/home_ai --cov-report=html --cov-report=term"

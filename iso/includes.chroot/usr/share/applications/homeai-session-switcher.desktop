@@ -1,0 +1,10 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=Home AI Session Switcher
+Comment=Switch between Kiosk and Desktop modes
+Exec=/opt/home-ai-os/scripts/session-switcher.py
+Icon=system-switch-user
+Terminal=false
+Categories=System;Settings;
+Keywords=session;kiosk;desktop;mode;switch;

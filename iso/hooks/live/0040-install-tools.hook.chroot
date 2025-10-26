@@ -1,0 +1,77 @@
+#!/bin/bash
+# Install Home AI OS tools and utilities
+
+set -e
+set -x
+
+echo "Installing Home AI OS tools..."
+
+# Create tools directory
+mkdir -p /opt/home-ai-os/scripts
+
+# Copy scripts
+if [ -d /tmp/scripts ]; then
+    cp /tmp/scripts/*.py /opt/home-ai-os/scripts/ || true
+    chmod +x /opt/home-ai-os/scripts/*.py
+    echo "Scripts installed"
+fi
+
+# Create symlinks in /usr/local/bin
+ln -sf /opt/home-ai-os/scripts/first-boot-wizard.py /usr/local/bin/homeai-first-boot-wizard
+ln -sf /opt/home-ai-os/scripts/driver-wizard.py /usr/local/bin/homeai-driver-wizard
+ln -sf /opt/home-ai-os/scripts/session-switcher.py /usr/local/bin/homeai-session-switcher
+ln -sf /opt/home-ai-os/scripts/update-manager.py /usr/local/bin/homeai-update-manager
+ln -sf /opt/home-ai-os/scripts/homeai-settings.py /usr/local/bin/homeai-settings
+
+echo "Symlinks created"
+
+# Desktop entries are already in /usr/share/applications via includes.chroot
+
+# Create autostart entry for first-boot wizard
+mkdir -p /etc/xdg/autostart
+cat > /etc/xdg/autostart/homeai-first-boot.desktop << 'EOF'
+[Desktop Entry]
+Type=Application
+Name=Home AI First Boot
+Exec=/usr/local/bin/homeai-first-boot-wizard
+Hidden=false
+NoDisplay=false
+X-GNOME-Autostart-enabled=true
+X-GNOME-Autostart-Delay=5
+OnlyShowIn=XFCE;
+EOF
+
+# Make autostart conditional on first boot
+cat > /opt/home-ai-os/scripts/check-first-boot.sh << 'EOF'
+#!/bin/bash
+# Check if first boot wizard should run
+
+CONFIG_FILE="$HOME/.home_ai/config.json"
+
+if [ ! -f "$CONFIG_FILE" ]; then
+    # First boot - run wizard
+    /usr/local/bin/homeai-first-boot-wizard
+elif [ -f "$CONFIG_FILE" ]; then
+    # Check if first_boot_complete is false
+    if ! grep -q '"first_boot_complete": true' "$CONFIG_FILE"; then
+        /usr/local/bin/homeai-first-boot-wizard
+    fi
+fi
+EOF
+
+chmod +x /opt/home-ai-os/scripts/check-first-boot.sh
+
+# Update autostart to use check script
+cat > /etc/xdg/autostart/homeai-first-boot.desktop << 'EOF'
+[Desktop Entry]
+Type=Application
+Name=Home AI First Boot Check
+Exec=/opt/home-ai-os/scripts/check-first-boot.sh
+Hidden=false
+NoDisplay=true
+X-GNOME-Autostart-enabled=true
+X-GNOME-Autostart-Delay=5
+OnlyShowIn=XFCE;
+EOF
+
+echo "Home AI OS tools installed successfully"

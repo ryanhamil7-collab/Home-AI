@@ -1,0 +1,10 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=Home AI First Boot Wizard
+Comment=Initial setup wizard for Home AI OS
+Exec=/opt/home-ai-os/scripts/first-boot-wizard.py
+Icon=system-run
+Terminal=false
+Categories=System;Settings;
+Keywords=setup;wizard;configuration;first-boot;

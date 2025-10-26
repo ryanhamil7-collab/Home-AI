@@ -1,0 +1,10 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=Home AI Driver Wizard
+Comment=Install and configure GPU drivers
+Exec=/opt/home-ai-os/scripts/driver-wizard.py
+Icon=video-display
+Terminal=false
+Categories=System;Settings;HardwareSettings;
+Keywords=driver;gpu;nvidia;amd;graphics;

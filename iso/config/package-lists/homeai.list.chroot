@@ -1,0 +1,63 @@
+# Base system
+linux-image-generic
+linux-headers-generic
+grub-pc
+grub-efi-amd64
+
+# Desktop environment
+xfce4
+xfce4-goodies
+lightdm
+lightdm-gtk-greeter
+
+# System utilities
+systemd
+dbus
+policykit-1
+network-manager
+network-manager-gnome
+pulseaudio
+pipewire
+pipewire-pulse
+
+# Development tools
+build-essential
+git
+curl
+wget
+
+# Python
+python3.11
+python3.11-venv
+python3-pip
+
+# Graphics drivers
+mesa-utils
+va-driver-all
+vdpau-driver-all
+
+# Fonts
+fonts-liberation
+fonts-dejavu-core
+ttf-mscorefonts-installer
+
+# Utilities
+vim
+nano
+htop
+tmux
+tree
+zip
+unzip
+
+# Network tools
+openssh-client
+ca-certificates
+
+# Hardware support
+firmware-linux
+firmware-linux-nonfree
+
+# Audio
+alsa-utils
+pavucontrol

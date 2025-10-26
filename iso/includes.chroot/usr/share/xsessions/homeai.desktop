@@ -1,0 +1,7 @@
+[Desktop Entry]
+Name=Home AI Session
+Comment=AI-Native Desktop Environment
+Exec=/usr/bin/homeai-session
+Type=Application
+DesktopNames=XFCE;HomeAI
+Icon=homeai

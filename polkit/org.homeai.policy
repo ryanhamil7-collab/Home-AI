@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE policyconfig PUBLIC
+ "-//freedesktop//DTD PolicyKit Policy Configuration 1.0//EN"
+ "http://www.freedesktop.org/standards/PolicyKit/1/policyconfig.dtd">
+<policyconfig>
+  <vendor>Home AI</vendor>
+  <vendor_url>https://github.com/ryanhamil7-collab/Home-AI</vendor_url>
+
+  <!-- Install Package -->
+  <action id="org.homeai.install-package">
+    <description>Install a package</description>
+    <message>Authentication is required to install packages</message>
+    <defaults>
+      <allow_any>auth_admin</allow_any>
+      <allow_inactive>auth_admin</allow_inactive>
+      <allow_active>auth_admin_keep</allow_active>
+    </defaults>
+    <annotate key="org.freedesktop.policykit.exec.path">/usr/bin/apt</annotate>
+  </action>
+
+  <!-- Update System -->
+  <action id="org.homeai.update-system">
+    <description>Update the system</description>
+    <message>Authentication is required to update the system</message>
+    <defaults>
+      <allow_any>auth_admin</allow_any>
+      <allow_inactive>auth_admin</allow_inactive>
+      <allow_active>auth_admin_keep</allow_active>
+    </defaults>
+    <annotate key="org.freedesktop.policykit.exec.path">/usr/bin/apt</annotate>
+  </action>
+
+  <!-- Restart Service -->
+  <action id="org.homeai.restart-service">
+    <description>Restart a system service</description>
+    <message>Authentication is required to restart services</message>
+    <defaults>
+      <allow_any>auth_admin</allow_any>
+      <allow_inactive>auth_admin</allow_inactive>
+      <allow_active>auth_admin_keep</allow_active>
+    </defaults>
+    <annotate key="org.freedesktop.policykit.exec.path">/usr/bin/systemctl</annotate>
+  </action>
+
+  <!-- Execute Command -->
+  <action id="org.homeai.execute-command">
+    <description>Execute a system command</description>
+    <message>Authentication is required to execute system commands</message>
+    <defaults>
+      <allow_any>auth_admin</allow_any>
+      <allow_inactive>auth_admin</allow_inactive>
+      <allow_active>auth_admin_keep</allow_active>
+    </defaults>
+  </action>
+
+  <!-- Modify System Configuration -->
+  <action id="org.homeai.modify-config">
+    <description>Modify system configuration</description>
+    <message>Authentication is required to modify system configuration</message>
+    <defaults>
+      <allow_any>auth_admin</allow_any>
+      <allow_inactive>auth_admin</allow_inactive>
+      <allow_active>auth_admin_keep</allow_active>
+    </defaults>
+  </action>
+</policyconfig>

@@ -1,0 +1,31 @@
+[Unit]
+Description=Home AI Background Agent
+Documentation=https://github.com/ryanhamil7-collab/Home-AI
+After=ollama.service network-online.target
+Requires=ollama.service
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=homeai
+Group=homeai
+WorkingDirectory=/opt/home-ai
+ExecStart=/opt/home-ai/venv/bin/python -m home_ai.agents.background
+Restart=always
+RestartSec=5
+Environment="PYTHONPATH=/opt/home-ai"
+Environment="HOME_AI_MODE=daemon"
+
+# Security
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/home/%u/.home_ai /var/lib/homeai
+
+# Resource limits
+LimitNOFILE=4096
+Nice=0
+
+[Install]
+WantedBy=multi-user.target

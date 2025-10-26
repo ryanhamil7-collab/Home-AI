@@ -1,0 +1,36 @@
+/* Home AI PolicyKit Rules */
+
+polkit.addRule(function(action, subject) {
+    if (action.id == "org.homeai.install-package" &&
+        subject.isInGroup("homeai-admin")) {
+        return polkit.Result.AUTH_ADMIN;
+    }
+});
+
+polkit.addRule(function(action, subject) {
+    if (action.id == "org.homeai.update-system" &&
+        subject.isInGroup("homeai-admin")) {
+        return polkit.Result.AUTH_ADMIN;
+    }
+});
+
+polkit.addRule(function(action, subject) {
+    if (action.id == "org.homeai.restart-service" &&
+        subject.isInGroup("homeai-admin")) {
+        return polkit.Result.AUTH_ADMIN;
+    }
+});
+
+polkit.addRule(function(action, subject) {
+    if (action.id == "org.homeai.execute-command" &&
+        subject.isInGroup("homeai-admin")) {
+        return polkit.Result.AUTH_ADMIN;
+    }
+});
+
+polkit.addRule(function(action, subject) {
+    if (action.id == "org.homeai.modify-config" &&
+        subject.isInGroup("homeai-admin")) {
+        return polkit.Result.AUTH_ADMIN;
+    }
+});

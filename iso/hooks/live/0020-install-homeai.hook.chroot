@@ -1,0 +1,53 @@
+#!/bin/bash
+# Install Home AI application in the live system
+
+set -e
+
+echo "Installing Home AI..."
+
+# Create homeai user and group
+if ! id -u homeai > /dev/null 2>&1; then
+    useradd -r -s /bin/bash -d /opt/home-ai -m homeai
+fi
+
+# Create homeai-admin group
+if ! getent group homeai-admin > /dev/null 2>&1; then
+    groupadd homeai-admin
+fi
+
+# Install directory
+INSTALL_DIR="/opt/home-ai"
+mkdir -p "$INSTALL_DIR"
+
+# Clone Home AI repository (will be replaced with package in Phase 2)
+cd /tmp
+git clone --depth 1 https://github.com/ryanhamil7-collab/Home-AI.git
+cd Home-AI
+
+# Create virtual environment
+python3.11 -m venv "$INSTALL_DIR/venv"
+
+# Install dependencies (excluding Windows-specific)
+"$INSTALL_DIR/venv/bin/pip" install --upgrade pip
+"$INSTALL_DIR/venv/bin/pip" install poetry
+
+# Install Home AI (skip Windows dependencies)
+sed -i '/pywin32/d; /pywinauto/d; /wmi/d' pyproject.toml
+"$INSTALL_DIR/venv/bin/poetry" install --no-dev
+
+# Copy source code
+cp -r src "$INSTALL_DIR/"
+cp -r docs "$INSTALL_DIR/"
+
+# Set permissions
+chown -R homeai:homeai "$INSTALL_DIR"
+
+# Create data directories
+mkdir -p /var/lib/homeai
+chown homeai:homeai /var/lib/homeai
+
+# Clean up
+cd /
+rm -rf /tmp/Home-AI
+
+echo "Home AI installed successfully"

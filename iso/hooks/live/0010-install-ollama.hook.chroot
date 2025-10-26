@@ -1,0 +1,23 @@
+#!/bin/bash
+# Install Ollama in the live system
+
+set -e
+
+echo "Installing Ollama..."
+
+# Download and install Ollama
+curl -fsSL https://ollama.ai/install.sh | sh
+
+# Create ollama user and group
+if ! id -u ollama > /dev/null 2>&1; then
+    useradd -r -s /bin/false -d /var/lib/ollama -m ollama
+fi
+
+# Create directories
+mkdir -p /var/lib/ollama/models
+chown -R ollama:ollama /var/lib/ollama
+
+# Enable service (will be started on boot)
+systemctl enable ollama.service
+
+echo "Ollama installed successfully"

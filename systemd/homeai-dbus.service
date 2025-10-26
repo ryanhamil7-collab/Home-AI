@@ -1,0 +1,23 @@
+[Unit]
+Description=Home AI D-Bus Service
+Documentation=https://github.com/ryanhamil7-collab/Home-AI
+After=dbus.service
+Requires=dbus.service
+
+[Service]
+Type=dbus
+BusName=org.homeai.Control
+ExecStart=/opt/home-ai/venv/bin/python -m home_ai.dbus.service
+Restart=on-failure
+RestartSec=5
+Environment="PYTHONPATH=/opt/home-ai"
+
+# Security
+NoNewPrivileges=false
+PrivateTmp=true
+
+# Resource limits
+LimitNOFILE=1024
+
+[Install]
+WantedBy=multi-user.target

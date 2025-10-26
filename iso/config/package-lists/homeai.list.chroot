@@ -13,6 +13,7 @@ lightdm-gtk-greeter
 # System utilities
 systemd
 dbus
+dbus-x11
 policykit-1
 network-manager
 network-manager-gnome
@@ -30,6 +31,22 @@ wget
 python3.11
 python3.11-venv
 python3-pip
+python3-dbus
+python3-gi
+gir1.2-glib-2.0
+
+# Window management tools
+wmctrl
+xdotool
+xprop
+x11-utils
+
+# Notifications
+libnotify-bin
+
+# Package management
+packagekit
+packagekit-tools
 
 # Graphics drivers
 mesa-utils
@@ -39,7 +56,6 @@ vdpau-driver-all
 # Fonts
 fonts-liberation
 fonts-dejavu-core
-ttf-mscorefonts-installer
 
 # Utilities
 vim
@@ -55,8 +71,7 @@ openssh-client
 ca-certificates
 
 # Hardware support
-firmware-linux
-firmware-linux-nonfree
+linux-firmware
 
 # Audio
 alsa-utils

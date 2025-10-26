@@ -1,0 +1,5 @@
+[D-BUS Service]
+Name=org.homeai.Control
+Exec=/opt/home-ai/venv/bin/python -m home_ai.dbus.service
+User=root
+SystemdService=homeai-dbus.service

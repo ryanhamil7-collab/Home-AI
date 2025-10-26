@@ -2,42 +2,110 @@
 # Install Home AI application in the live system
 
 set -e
+set -x
 
 echo "Installing Home AI..."
 
 # Create homeai user and group
 if ! id -u homeai > /dev/null 2>&1; then
-    useradd -r -s /bin/bash -d /opt/home-ai -m homeai
+    useradd -r -s /bin/bash -d /home/homeai -m homeai
+    echo "Created homeai user"
 fi
 
 # Create homeai-admin group
 if ! getent group homeai-admin > /dev/null 2>&1; then
     groupadd homeai-admin
+    echo "Created homeai-admin group"
 fi
+
+# Add homeai to necessary groups
+usermod -aG video,audio,input homeai
 
 # Install directory
 INSTALL_DIR="/opt/home-ai"
 mkdir -p "$INSTALL_DIR"
 
-# Clone Home AI repository (will be replaced with package in Phase 2)
-cd /tmp
-git clone --depth 1 https://github.com/ryanhamil7-collab/Home-AI.git
-cd Home-AI
+# For Phase 1, we'll create a minimal installation
+# Phase 2 will use proper .deb packaging
+echo "Creating minimal Home AI installation..."
 
 # Create virtual environment
 python3.11 -m venv "$INSTALL_DIR/venv"
 
-# Install dependencies (excluding Windows-specific)
-"$INSTALL_DIR/venv/bin/pip" install --upgrade pip
-"$INSTALL_DIR/venv/bin/pip" install poetry
+# Install core dependencies
+"$INSTALL_DIR/venv/bin/pip" install --upgrade pip setuptools wheel
 
-# Install Home AI (skip Windows dependencies)
-sed -i '/pywin32/d; /pywinauto/d; /wmi/d' pyproject.toml
-"$INSTALL_DIR/venv/bin/poetry" install --no-dev
+# Install required packages
+"$INSTALL_DIR/venv/bin/pip" install \
+    ollama \
+    PyQt6 \
+    loguru \
+    psutil \
+    pynput \
+    pyautogui \
+    mss \
+    pydantic \
+    pydantic-settings \
+    python-dotenv \
+    cryptography \
+    keyring \
+    APScheduler \
+    requests \
+    dbus-python \
+    PyGObject
 
-# Copy source code
-cp -r src "$INSTALL_DIR/"
-cp -r docs "$INSTALL_DIR/"
+# Create placeholder application structure
+mkdir -p "$INSTALL_DIR/src/home_ai"
+cat > "$INSTALL_DIR/src/home_ai/__init__.py" << 'EOF'
+"""Home AI - AI-Native Desktop Environment"""
+__version__ = "0.1.0"
+EOF
+
+# Create minimal main.py
+cat > "$INSTALL_DIR/src/home_ai/main.py" << 'EOF'
+#!/usr/bin/env python3
+"""Home AI main entry point"""
+import sys
+from PyQt6.QtWidgets import QApplication, QMainWindow, QLabel
+from PyQt6.QtCore import Qt
+
+class HomeAIWindow(QMainWindow):
+    def __init__(self):
+        super().__init__()
+        self.setWindowTitle("Home AI OS - Phase 1")
+        self.setGeometry(100, 100, 800, 600)
+        
+        label = QLabel("Home AI OS - Phase 1 MVP\n\nWelcome to Home AI!\n\nFull application coming in Phase 2.", self)
+        label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        label.setStyleSheet("font-size: 24px; padding: 50px;")
+        self.setCentralWidget(label)
+
+def main():
+    app = QApplication(sys.argv)
+    window = HomeAIWindow()
+    
+    # Check for kiosk mode
+    if "--kiosk" in sys.argv:
+        window.setWindowFlags(Qt.WindowType.FramelessWindowHint)
+        window.showFullScreen()
+    else:
+        window.show()
+    
+    return app.exec()
+
+if __name__ == "__main__":
+    sys.exit(main())
+EOF
+
+# Make it executable
+chmod +x "$INSTALL_DIR/src/home_ai/main.py"
+
+# Create launcher script
+cat > "$INSTALL_DIR/bin/homeai" << 'EOF'
+#!/bin/bash
+exec /opt/home-ai/venv/bin/python /opt/home-ai/src/home_ai/main.py "$@"
+EOF
+chmod +x "$INSTALL_DIR/bin/homeai"
 
 # Set permissions
 chown -R homeai:homeai "$INSTALL_DIR"
@@ -46,8 +114,38 @@ chown -R homeai:homeai "$INSTALL_DIR"
 mkdir -p /var/lib/homeai
 chown homeai:homeai /var/lib/homeai
 
-# Clean up
-cd /
-rm -rf /tmp/Home-AI
+# Create user config directory template
+mkdir -p /etc/skel/.home_ai
+cat > /etc/skel/.home_ai/config.json << 'EOF'
+{
+  "version": "0.1.0",
+  "first_boot": true
+}
+EOF
 
-echo "Home AI installed successfully"
+# Copy systemd service files
+if [ -d /tmp/systemd ]; then
+    cp /tmp/systemd/*.service /etc/systemd/system/ || true
+    systemctl daemon-reload
+fi
+
+# Copy D-Bus configuration
+if [ -d /tmp/dbus ]; then
+    cp /tmp/dbus/*.conf /etc/dbus-1/system.d/ || true
+    cp /tmp/dbus/*.service /usr/share/dbus-1/system-services/ || true
+fi
+
+# Copy PolicyKit rules
+if [ -d /tmp/polkit ]; then
+    cp /tmp/polkit/*.policy /usr/share/polkit-1/actions/ || true
+    cp /tmp/polkit/*.rules /usr/share/polkit-1/rules.d/ || true
+fi
+
+# Copy session files
+if [ -f /tmp/homeai-session ]; then
+    cp /tmp/homeai-session /usr/bin/homeai-session
+    chmod +x /usr/bin/homeai-session
+fi
+
+echo "Home AI installed successfully (Phase 1 minimal installation)"
+echo "Full application will be available in Phase 2"

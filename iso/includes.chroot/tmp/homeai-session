@@ -1,0 +1,57 @@
+#!/bin/bash
+# Home AI Session Launcher
+# Starts Xfce desktop with Home AI in kiosk mode
+
+set -e
+
+# Log file
+LOG_FILE="$HOME/.home_ai/session.log"
+mkdir -p "$(dirname "$LOG_FILE")"
+
+log() {
+    echo "[$(date '+%Y-%m-%d %H:%M:%S')] $*" | tee -a "$LOG_FILE"
+}
+
+log "Starting Home AI Session"
+
+# Start Xfce components in background
+log "Starting Xfce desktop components"
+xfce4-session &
+XFCE_PID=$!
+
+# Wait for desktop to be ready
+log "Waiting for desktop to initialize"
+sleep 3
+
+# Check if Ollama is running
+log "Checking Ollama service"
+if ! systemctl is-active --quiet ollama.service; then
+    log "WARNING: Ollama service is not running"
+    notify-send "Home AI" "Ollama service is not running. Some features may not work."
+fi
+
+# Launch Home AI in kiosk mode
+log "Launching Home AI GUI in kiosk mode"
+/opt/home-ai/venv/bin/python -m home_ai.main --kiosk 2>&1 | tee -a "$LOG_FILE" &
+HOMEAI_PID=$!
+
+log "Home AI Session started (PID: $HOMEAI_PID)"
+
+# Wait for Home AI to exit
+wait $HOMEAI_PID
+EXIT_CODE=$?
+
+log "Home AI exited with code $EXIT_CODE"
+
+# If Home AI crashed, show error
+if [ $EXIT_CODE -ne 0 ]; then
+    log "ERROR: Home AI crashed with exit code $EXIT_CODE"
+    notify-send -u critical "Home AI" "Application crashed. Check logs at $LOG_FILE"
+fi
+
+# Kill Xfce session
+log "Stopping Xfce session"
+kill $XFCE_PID 2>/dev/null || true
+
+log "Home AI Session ended"
+exit $EXIT_CODE

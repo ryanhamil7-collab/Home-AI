@@ -2,13 +2,29 @@
 # Install Ollama in the live system
 
 set -e
+set -x
 
 echo "Installing Ollama..."
 
-# Download and install Ollama
-curl -fsSL https://ollama.ai/install.sh | sh
+# Add Ollama GPG key and repository
+curl -fsSL https://ollama.ai/install.sh > /tmp/ollama-install.sh
 
-# Create ollama user and group
+# Check if download succeeded
+if [ ! -s /tmp/ollama-install.sh ]; then
+    echo "ERROR: Failed to download Ollama installer"
+    exit 1
+fi
+
+# Run installer with error handling
+if ! sh /tmp/ollama-install.sh; then
+    echo "ERROR: Ollama installation failed"
+    exit 1
+fi
+
+# Clean up
+rm -f /tmp/ollama-install.sh
+
+# Create ollama user and group if not exists
 if ! id -u ollama > /dev/null 2>&1; then
     useradd -r -s /bin/false -d /var/lib/ollama -m ollama
 fi
@@ -17,7 +33,18 @@ fi
 mkdir -p /var/lib/ollama/models
 chown -R ollama:ollama /var/lib/ollama
 
+# Copy systemd service file
+if [ -f /tmp/systemd/ollama.service ]; then
+    cp /tmp/systemd/ollama.service /etc/systemd/system/
+    systemctl daemon-reload
+fi
+
 # Enable service (will be started on boot)
-systemctl enable ollama.service
+if systemctl list-unit-files | grep -q ollama.service; then
+    systemctl enable ollama.service
+    echo "Ollama service enabled"
+else
+    echo "WARNING: ollama.service not found, will need manual setup"
+fi
 
 echo "Ollama installed successfully"

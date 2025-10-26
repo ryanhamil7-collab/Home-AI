@@ -18,6 +18,7 @@ from home_ai.security.audit_logger import get_audit_logger
 from home_ai.ui.settings_dialog import SettingsDialog
 from home_ai.ui.vision_tab import VisionTab
 from home_ai.ui.business_widget import BusinessWidget
+from home_ai.ui.self_improve_tab import SelfImproveTab
 
 
 class ChatThread(QThread):
@@ -75,6 +76,7 @@ class MainWindow(QMainWindow):
         self.create_business_tab()
         self.create_monitoring_tab()
         self.create_logs_tab()
+        self.create_self_improve_tab()
         
         self.status_bar = QStatusBar()
         self.setStatusBar(self.status_bar)
@@ -254,6 +256,18 @@ class MainWindow(QMainWindow):
         layout.addLayout(button_layout)
         
         self.tabs.addTab(logs_widget, "🔒 Logs")
+    
+    def create_self_improve_tab(self):
+        """Create self-improvement tab."""
+        try:
+            self.self_improve_tab = SelfImproveTab()
+            self.tabs.addTab(self.self_improve_tab, "🔧 Self-Improve")
+        except Exception as e:
+            logger.error(f"Failed to create self-improvement tab: {e}")
+            placeholder = QWidget()
+            layout = QVBoxLayout(placeholder)
+            layout.addWidget(QLabel(f"Self-improvement system unavailable: {e}"))
+            self.tabs.addTab(placeholder, "🔧 Self-Improve")
     
     def setup_timers(self):
         """Setup periodic update timers."""

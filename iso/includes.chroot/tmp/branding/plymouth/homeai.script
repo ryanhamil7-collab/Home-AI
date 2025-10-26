@@ -1,0 +1,54 @@
+# Home AI Plymouth Boot Splash Theme
+
+# Background
+Window.SetBackgroundTopColor(0.10, 0.13, 0.19);
+Window.SetBackgroundBottomColor(0.06, 0.19, 0.38);
+
+# Logo
+logo.image = Image("logo.png");
+logo.sprite = Sprite(logo.image);
+logo.sprite.SetX(Window.GetWidth() / 2 - logo.image.GetWidth() / 2);
+logo.sprite.SetY(Window.GetHeight() / 2 - logo.image.GetHeight() / 2 - 50);
+
+# Text
+message_sprite = Sprite();
+message_sprite.SetPosition(Window.GetWidth() / 2 - 100, Window.GetHeight() / 2 + 100, 10000);
+
+fun message_callback(text) {
+    my_image = Image.Text(text, 1, 1, 1);
+    message_sprite.SetImage(my_image);
+}
+
+Plymouth.SetMessageFunction(message_callback);
+
+# Progress bar
+progress_box.image = Image("progress_box.png");
+progress_box.sprite = Sprite(progress_box.image);
+progress_box.x = Window.GetWidth() / 2 - progress_box.image.GetWidth() / 2;
+progress_box.y = Window.GetHeight() * 0.75;
+progress_box.sprite.SetPosition(progress_box.x, progress_box.y, 0);
+
+progress_bar.original_image = Image("progress_bar.png");
+progress_bar.sprite = Sprite();
+progress_bar.x = Window.GetWidth() / 2 - progress_bar.original_image.GetWidth() / 2;
+progress_bar.y = Window.GetHeight() * 0.75 + 10;
+progress_bar.sprite.SetPosition(progress_bar.x, progress_bar.y, 1);
+
+fun progress_callback(duration, progress) {
+    if (progress_bar.image.GetWidth() != Math.Int(progress_bar.original_image.GetWidth() * progress)) {
+        progress_bar.image = progress_bar.original_image.Scale(progress_bar.original_image.GetWidth(progress_bar.original_image) * progress, progress_bar.original_image.GetHeight());
+        progress_bar.sprite.SetImage(progress_bar.image);
+    }
+}
+
+Plymouth.SetBootProgressFunction(progress_callback);
+
+# Quit callback
+fun quit_callback() {
+    logo.sprite.SetOpacity(0);
+    message_sprite.SetOpacity(0);
+    progress_box.sprite.SetOpacity(0);
+    progress_bar.sprite.SetOpacity(0);
+}
+
+Plymouth.SetQuitFunction(quit_callback);

@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="1920" height="1080" xmlns="http://www.w3.org/2000/svg">
+  <!-- Gradient background -->
+  <defs>
+    <linearGradient id="bg-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#1a1a2e;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#16213e;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#0f3460;stop-opacity:1" />
+    </linearGradient>
+    
+    <radialGradient id="glow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" style="stop-color:#00d4ff;stop-opacity:0.3" />
+      <stop offset="100%" style="stop-color:#00d4ff;stop-opacity:0" />
+    </radialGradient>
+  </defs>
+  
+  <!-- Background -->
+  <rect width="1920" height="1080" fill="url(#bg-gradient)"/>
+  
+  <!-- Glow effect -->
+  <circle cx="960" cy="540" r="400" fill="url(#glow)"/>
+  
+  <!-- Circuit pattern -->
+  <g opacity="0.1" stroke="#00d4ff" stroke-width="2" fill="none">
+    <line x1="100" y1="200" x2="300" y2="200"/>
+    <circle cx="300" cy="200" r="5" fill="#00d4ff"/>
+    <line x1="300" y1="200" x2="500" y2="400"/>
+    <circle cx="500" cy="400" r="5" fill="#00d4ff"/>
+    
+    <line x1="1820" y1="880" x2="1620" y2="880"/>
+    <circle cx="1620" cy="880" r="5" fill="#00d4ff"/>
+    <line x1="1620" y1="880" x2="1420" y2="680"/>
+    <circle cx="1420" cy="680" r="5" fill="#00d4ff"/>
+  </g>
+  
+  <!-- Logo/Text -->
+  <text x="960" y="480" font-family="Arial, sans-serif" font-size="72" font-weight="bold" 
+        fill="#ffffff" text-anchor="middle">
+    Home AI OS
+  </text>
+  
+  <text x="960" y="540" font-family="Arial, sans-serif" font-size="32" 
+        fill="#00d4ff" text-anchor="middle">
+    AI-Native Desktop Environment
+  </text>
+  
+  <text x="960" y="600" font-family="Arial, sans-serif" font-size="18" 
+        fill="#888888" text-anchor="middle">
+    Powered by Ubuntu 24.04 LTS
+  </text>
+</svg>

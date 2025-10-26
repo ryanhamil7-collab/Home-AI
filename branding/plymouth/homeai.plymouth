@@ -1,0 +1,8 @@
+[Plymouth Theme]
+Name=Home AI
+Description=Home AI OS boot splash
+ModuleName=script
+
+[script]
+ImageDir=/usr/share/plymouth/themes/homeai
+ScriptFile=/usr/share/plymouth/themes/homeai/homeai.script

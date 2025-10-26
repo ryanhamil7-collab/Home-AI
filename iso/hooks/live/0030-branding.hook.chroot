@@ -1,0 +1,53 @@
+#!/bin/bash
+# Install Home AI branding
+
+set -e
+set -x
+
+echo "Installing Home AI branding..."
+
+# Copy wallpaper
+if [ -f /tmp/branding/wallpapers/homeai-default.svg ]; then
+    mkdir -p /usr/share/backgrounds
+    cp /tmp/branding/wallpapers/homeai-default.svg /usr/share/backgrounds/
+    echo "Wallpaper installed"
+fi
+
+# Copy LightDM theme
+if [ -f /tmp/branding/lightdm/homeai-theme.conf ]; then
+    mkdir -p /etc/lightdm/lightdm-gtk-greeter.conf.d
+    cp /tmp/branding/lightdm/homeai-theme.conf /etc/lightdm/lightdm-gtk-greeter.conf.d/90-homeai.conf
+    echo "LightDM theme installed"
+fi
+
+# Copy Plymouth theme
+if [ -d /tmp/branding/plymouth ]; then
+    mkdir -p /usr/share/plymouth/themes/homeai
+    cp /tmp/branding/plymouth/* /usr/share/plymouth/themes/homeai/ || true
+    
+    # Set as default (if plymouth is installed)
+    if command -v plymouth-set-default-theme &> /dev/null; then
+        plymouth-set-default-theme homeai || echo "WARNING: Could not set plymouth theme"
+    fi
+    echo "Plymouth theme installed"
+fi
+
+# Set default wallpaper for all users
+mkdir -p /etc/skel/.config
+cat > /etc/skel/.config/xfce4-desktop.xml << 'EOF'
+<?xml version="1.0" encoding="UTF-8"?>
+<channel name="xfce4-desktop" version="1.0">
+  <property name="backdrop" type="empty">
+    <property name="screen0" type="empty">
+      <property name="monitor0" type="empty">
+        <property name="workspace0" type="empty">
+          <property name="image-path" type="string" value="/usr/share/backgrounds/homeai-default.svg"/>
+          <property name="image-style" type="int" value="5"/>
+        </property>
+      </property>
+    </property>
+  </property>
+</channel>
+EOF
+
+echo "Home AI branding installed successfully"
